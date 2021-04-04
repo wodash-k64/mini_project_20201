@@ -24,6 +24,7 @@
 
 #ifndef _btheader_
 #define _btheader_
+
 #include <stdio.h>
 
 #include "bc.h"
@@ -32,10 +33,10 @@
   B tree cache manager structure
 */
 struct bt_cntrl {
-   BTint inmem;  /* holds block number of in-memory copy */
-   int busy;   /* if non-ZERO, block cannot be flushed to disk */
-   int writes; /* if non-ZERO, number of writes to this block */
-   int lrunxt;  /* index of next in-memory block for LRU queue */
+    BTint inmem;  /* holds block number of in-memory copy */
+    int busy;   /* if non-ZERO, block cannot be flushed to disk */
+    int writes; /* if non-ZERO, number of writes to this block */
+    int lrunxt;  /* index of next in-memory block for LRU queue */
 };
 
 typedef struct bt_cntrl CNTRL;
@@ -70,11 +71,11 @@ struct bt_keyent {
 };
 
 typedef struct bt_keyent KEYENT;
-    
+
 struct bt_memrec {
     BTint infblk[ZINFSZ];
     KEYENT keyblk[ZMXKEY];
-    BTint lnkblk[ZMXKEY+1];
+    BTint lnkblk[ZMXKEY + 1];
 #if ZPAD != 0
     BTint padblk[ZPAD];
 #endif
@@ -86,7 +87,7 @@ typedef struct bt_memrec MEMREC;
 
 struct bt_datblk {
     BTint infblk[ZINFSZ];
-    char data[ZBLKSZ-(ZINFSZ*ZBPW)];
+    char data[ZBLKSZ - (ZINFSZ * ZBPW)];
 };
 
 typedef struct bt_datblk DATBLK;

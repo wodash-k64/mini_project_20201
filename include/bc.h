@@ -55,7 +55,7 @@ typedef int BTint;
 #define ZBYTEW 8
 
 /* number of bytes per BTint */
-#if _FILE_OFFSET_BITS == 64 
+#if _FILE_OFFSET_BITS == 64
 #define ZBPW 8
 #else
 #define ZBPW 4
@@ -65,7 +65,7 @@ typedef int BTint;
 /* maximum key size (bytes) */
 #define ZKYLEN 32
 
-#if _FILE_OFFSET_BITS==64
+#if _FILE_OFFSET_BITS == 64
 /* number of in-memory blocks (assume LFS users are memory rich) */
 #define ZMXBLK  16
 /* block size in bytes for LFS users (must be power of 2) */
@@ -78,7 +78,7 @@ typedef int BTint;
 #endif
 
 /* number of keys per block */
-#define ZMXKEY ((ZBLKSZ-ZBPW-ZINFSZ*ZBPW)/(ZKYLEN+(3*ZBPW))) 
+#define ZMXKEY ((ZBLKSZ-ZBPW-ZINFSZ*ZBPW)/(ZKYLEN+(3*ZBPW)))
 /* number of pad words required */
 #define ZPAD ((ZBLKSZ-(ZKYLEN+(3*ZBPW))*ZMXKEY-ZBPW-ZINFSZ*ZBPW)/ZBPW)
 /* threshold for block joining */
@@ -156,7 +156,7 @@ typedef int BTint;
 #define ZDOVRH  (ZDRSZ+ZBPW)
 
 /* minimum number of bytes for a data segment */
-#define ZDSGMN 7    
+#define ZDSGMN 7
 
 /* Previous/next key constants */
 #define ZPREV 1
@@ -167,13 +167,13 @@ typedef int BTint;
 /* Enforce 3 in-memory blocks as minimum
     Need 3 when a root block is split 
 */
-#if (ZMXBLK < 3) 
+#if (ZMXBLK < 3)
 #error Must have minimum of three in-memory blocks
 #endif
 
 /* Ensure block joining will take place
 */
-#if (ZMXKEY-ZTHRES <= 0)
+#if (ZMXKEY - ZTHRES <= 0)
 #error Definition of ZMXKEY and ZTHRES inconsistent
 #endif
 

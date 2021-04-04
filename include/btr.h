@@ -26,16 +26,16 @@
 #define ZINFSZ4 5
 
 /* number of keys per block */
-#define ZMXKEY4 ((ZBLKSZ-ZBPW-ZINFSZ4*ZBPW)/(ZKYLEN+2*ZBPW)) 
+#define ZMXKEY4 ((ZBLKSZ-ZBPW-ZINFSZ4*ZBPW)/(ZKYLEN+2*ZBPW))
 /* number of pad words required */
 #define ZPAD4 ((ZBLKSZ-(ZKYLEN+2*ZBPW)*ZMXKEY4-ZBPW-ZINFSZ4*ZBPW)/ZBPW)
 
 /* bt v4 in-memory structure (v5 includes flag for duplicate key) */
 struct bt_memrec4 {
-   BTint infblk[ZINFSZ4];
-   char keyblk[ZMXKEY4] [ZKYLEN];
-   BTint valblk[ZMXKEY4];
-   BTint lnkblk[ZMXKEY4+1];
+    BTint infblk[ZINFSZ4];
+    char keyblk[ZMXKEY4][ZKYLEN];
+    BTint valblk[ZMXKEY4];
+    BTint lnkblk[ZMXKEY4 + 1];
 #if ZPAD4 != 0
     BTint padblk[ZPAD4];
 #endif
@@ -47,7 +47,7 @@ typedef struct bt_memrec4 MEMREC4;
 
 struct bt_datblk4 {
     BTint infblk[ZINFSZ4];
-    char data[ZBLKSZ-(ZINFSZ4*ZBPW)];
+    char data[ZBLKSZ - (ZINFSZ4 * ZBPW)];
 };
 
 typedef struct bt_datblk4 DATBLK4;

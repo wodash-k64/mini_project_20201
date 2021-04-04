@@ -26,37 +26,58 @@
 #include "bt.h"
 
 extern int btcls(BTA *);
-extern BTA *btcrt(char *,int, int);
-extern int btchgr(BTA *,char *);
-extern int btcrtr(BTA *,char *);
-extern int btdups(BTA *,BTint);
-extern int btinit(void);
-extern BTA *btopn(char *,int,int);
-extern int bdbug(BTA *,char *,BTint);
-extern int bfndky(BTA *,char *,BTint *);
-extern int bfndky_n(BTA *,char *,BTint *,int );
-extern int binsky(BTA *,char *,BTint);
-extern int bnxtky(BTA *,char *,BTint *);
-extern int bprvky(BTA *,char *,BTint *);
-extern int bdelky(BTA *,char *);
-extern int btdelr(BTA*,char *);
-extern void btcerr(int *,int *,char *,char *);
-extern int bupdky(BTA *,char *,BTint);
 
-extern int btins(BTA *,char *,char *,int);
-extern int btsel(BTA *,char *,char *,int,int *);
-extern int btsel_n(BTA *,char *,char *,int,int *,int);
-extern int btupd(BTA *,char *,char *,int);
-extern int btdel(BTA *,char *);
-extern int btseln(BTA *,char *,char *,int,int *);
-extern int btselp(BTA *,char *,char *,int,int *);
-extern int btrecs(BTA *,char *,int *);
+extern BTA *btcrt(char *, int, int);
+
+extern int btchgr(BTA *, char *);
+
+extern int btcrtr(BTA *, char *);
+
+extern int btdups(BTA *, BTint);
+
+extern int btinit(void);
+
+extern BTA *btopn(char *, int, int);
+
+extern int bdbug(BTA *, char *, BTint);
+
+extern int bfndky(BTA *, char *, BTint *);
+
+extern int binsky(BTA *, char *, BTint);
+
+extern int bnxtky(BTA *, char *, BTint *);
+
+extern int bprvky(BTA *, char *, BTint *);
+
+extern int bdelky(BTA *, char *);
+
+extern int btdelr(BTA *, char *);
+
+extern void btcerr(int *, int *, char *, char *);
+
+extern int bupdky(BTA *, char *, BTint);
+
+extern int btins(BTA *, char *, char *, int);
+
+extern int btsel(BTA *, char *, char *, int, int *);
+
+extern int btupd(BTA *, char *, char *, int);
+
+extern int btdel(BTA *, char *);
+
+extern int btseln(BTA *, char *, char *, int, int *);
+
+extern int btselp(BTA *, char *, char *, int, int *);
+
+extern int btrecs(BTA *, char *, int *);
 
 extern int btlock(BTA *);
+
 extern int btunlock(BTA *);
 
-extern int btpos(BTA *,int);
-extern int btthresh(BTA*, int);
+extern int btpos(BTA *, int);
+
+extern int btthresh(BTA *, int);
 
 
 

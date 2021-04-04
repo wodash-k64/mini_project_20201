@@ -4,7 +4,7 @@ CFLAGS	= -g -Wall -Iinclude -Llib -lbt -lreadline
 
 RM	=	rm -f
 
-BIN_FOLDER = bin
+BIN_FOLDER = out
 
 SRCS	=	src/main.c
 
