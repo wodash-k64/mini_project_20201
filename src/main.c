@@ -5,7 +5,7 @@
 
 #include "btree.h"
 
-#define BUFF_SIZE 100
+#define BUFF_SIZE 50
 
 int size;
 BTA *dict;
@@ -100,7 +100,7 @@ char *suggest_generator(const char *text, int state)
         memset(word, 0, 100 * 100);
         strcpy(key, text);
         strcpy(ntext, text);
-        ntext[strlen(ntext)] = 'z';
+        strcat(ntext, "zzzzzz");
         btsel(dict, key, value, BUFF_SIZE, &size);
         btselp(dict, key, value, BUFF_SIZE, &size);
         while (btseln(dict, key, value, BUFF_SIZE, &size) == 0 && i < 90)
@@ -118,11 +118,12 @@ char *suggest_generator(const char *text, int state)
 
     while (1)
     {
-        name = word[i++];
+        name = word[i];
         if (strcmp(word[i], "") == 0)
         {
-            break;
+            return NULL;
         }
+        i++;
         return strdup(name);
     }
 
@@ -143,7 +144,7 @@ void print(char *start, char *end)
     {
         if (1 || index % 1000 == 1)
         {
-            printf("|%-10d|%-20s|%-20s|\n------------------------------------------------------\n", index,
+            printf("|%-10d|%20s|%20s|\n------------------------------------------------------\n", index,
                    key, value);
         }
         if (strcmp(key, end) >= 0)
