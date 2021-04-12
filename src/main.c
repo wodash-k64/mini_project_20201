@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdio_ext.h>
 #include <stdlib.h>
 #include <string.h>
 #include <readline/readline.h>
@@ -10,173 +11,142 @@
 int size;
 BTA *dict;
 
-int get_int();
-void get_line(char *string);
-void print(char *start, char *end);
 char **suggest_completion(const char *, int, int);
+
 char *suggest_generator(const char *, int);
 
-int main()
-{
+int main() {
     rl_attempted_completion_function = suggest_completion;
 
-    int n;
-    char value[BUFF_SIZE];
-    char key[BUFF_SIZE];
-    char *buff = NULL;
+    int n = 0;
+    char *buff_1 = malloc(BUFF_SIZE);
+    char *buff_2 = malloc(BUFF_SIZE);
+    char *buff_3 = malloc(BUFF_SIZE);
 
     btinit();
     dict = btopn("dict_db", 0, 0);
-    do
-    {
-        system("clear");
-        printf("1.Add\n2.Search\n3.Delete\n4.Print list\n5.Exit\nYour choice:");
-        n = get_int();
-        switch (n)
-        {
-        case 1:
-            printf("Key: ");
-            get_line(key);
-            printf("Value: ");
-            get_line(value);
-            btins(dict, strdup(key), strdup(value), BUFF_SIZE);
-            break;
-        case 2:
-            buff = readline("Key: ");
-            if (buff[strlen(buff) - 1] == ' ')
-            {
-                buff[strlen(buff) - 1] = '\0';
+
+    // Nếu chưa có dict_db, dùng dữ liệu từ data.txt để tạo ra
+    if (!dict) {
+        dict = btcrt("dict_db", 0, 0);
+        FILE *f_data = fopen("data.txt", "r");
+        while (!feof(f_data)) {
+            memset(buff_1, 0, BUFF_SIZE);
+            memset(buff_2, 0, BUFF_SIZE);
+            fscanf(f_data, "%s", buff_1);
+            fgetc(f_data);
+            for (int i = 0; i < strlen(buff_1); ++i) {
+                if (buff_1[i] == 'z') {
+                    buff_2[i] = 'a';
+                } else {
+                    buff_2[i] = (char) (buff_1[i] + 1);
+                }
             }
-            if (btsel(dict, buff, value, BUFF_SIZE, &size))
-                printf("Not found value for %s!\n", buff);
-            else
-                printf("Value of %s is %s\n", buff, value);
-            free(buff);
-            break;
-        case 3:
-            printf("Key: ");
-            get_line(key);
-            btdel(dict, key);
-            break;
-        case 4:
-            printf("Start: ");
-            get_line(key);
-            printf("End: ");
-            get_line(value);
-            print(key, value);
-            break;
-        case 5:
-            btcls(dict);
-            break;
-        default:
-            break;
+            btins(dict, buff_1, buff_2, BUFF_SIZE);
         }
-        if (n == 4 || n == 2)
-        {
-            printf("Press enter to continue...");
+    }
+
+    do {
+        system("clear");
+        printf("\n1.Add\n2.Search\n3.Delete\n4.Print\n5.Exit\nEnter your choice: ");
+        __fpurge(stdin);
+        scanf("%d", &n);
+        switch (n) {
+            case 1:
+                memset(buff_1, 0, BUFF_SIZE);
+                memset(buff_2, 0, BUFF_SIZE);
+                memset(buff_3, 0, BUFF_SIZE);
+                printf("Key: ");
+                __fpurge(stdin);
+                fgets(buff_1, BUFF_SIZE, stdin);
+                if (buff_1[strlen(buff_1) - 1] == '\n') {
+                    buff_1[strlen(buff_1) - 1] = '\0';
+                }
+                printf("Value: ");
+                __fpurge(stdin);
+                fgets(buff_2, BUFF_SIZE, stdin);
+                if (buff_2[strlen(buff_1) - 1] == '\n') {
+                    buff_2[strlen(buff_1) - 1] = '\0';
+                }
+                btins(dict, buff_1, buff_2, BUFF_SIZE);
+                break;
+            case 2:
+                memset(buff_1, 0, BUFF_SIZE);
+                memset(buff_2, 0, BUFF_SIZE);
+                memset(buff_3, 0, BUFF_SIZE);
+                buff_1 = readline("Search: ");
+                if (buff_1[strlen(buff_1) - 1] == ' ') {
+                    buff_1[strlen(buff_1) - 1] = '\0';
+                }
+                btsel(dict, buff_1, buff_2, BUFF_SIZE, &size);
+                printf("Value of %s is %s\n", buff_1, buff_2);
+                break;
+            case 3:
+                break;
+            case 4:
+                memset(buff_1, 0, BUFF_SIZE);
+                memset(buff_2, 0, BUFF_SIZE);
+                memset(buff_3, 0, BUFF_SIZE);
+                printf("Start with: ");
+                __fpurge(stdin);
+                fgets(buff_1, BUFF_SIZE, stdin);
+                if (buff_1[strlen(buff_1) - 1] == '\n') {
+                    buff_1[strlen(buff_1) - 1] = '\0';
+                }
+                int len = strlen(buff_1);
+                strcpy(buff_3, buff_1);
+                btsel(dict, buff_1, buff_2, BUFF_SIZE, &size);
+                while (btseln(dict, buff_1, buff_2, BUFF_SIZE, &size) == 0) {
+                    if (strncmp(buff_3, buff_1, len) == 0) {
+                        printf("|%20s|%20s|\n-------------------------------------------\n", buff_1, buff_2);
+                    } else {
+                        break;
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+
+        if (n == 2 || n == 4) {
+            __fpurge(stdin);
+            printf("Press enter to continue!!!");
             getchar();
         }
-    } while (n != 5);
 
+    } while (n != 5);
+    system("rm dict_db");
+    free(buff_1);
+    free(buff_2);
+    free(buff_3);
     return 0;
 }
 
-char **suggest_completion(const char *text, int start, int end)
-{
+char **suggest_completion(const char *text, int start, int end) {
     rl_attempted_completion_over = 1;
     return rl_completion_matches(text, suggest_generator);
 }
 
-char *suggest_generator(const char *text, int state)
-{
-    static char word[100][100] = {0}, ntext[100] = {0};
-    static int i = 0;
-    char *name;
-    char value[BUFF_SIZE], key[BUFF_SIZE];
-
-    if (!state)
-    {
-        memset(ntext, 0, 100);
-        memset(word, 0, 100 * 100);
-        strcpy(key, text);
-        strcpy(ntext, text);
-        strcat(ntext, "zzzzzz");
-        btsel(dict, key, value, BUFF_SIZE, &size);
-        btselp(dict, key, value, BUFF_SIZE, &size);
-        while (btseln(dict, key, value, BUFF_SIZE, &size) == 0 && i < 90)
-        {
-            if (strcmp(key, ntext) >= 0)
-            {
-                break;
-            }
-            strcpy(word[i], key);
-            i++;
-        }
-        strcpy(word[i], "");
-        i = 0;
+char *suggest_generator(const char *text, int state) {
+    static int len = 0;
+    char buff1[BUFF_SIZE], buff2[BUFF_SIZE], buff3[BUFF_SIZE], *p;
+    if (strlen(text) == 0) {
+        return NULL;
     }
-
-    while (1)
-    {
-        name = word[i];
-        if (strcmp(word[i], "") == 0)
-        {
+    if (!state) {
+        memset(buff1, 0, BUFF_SIZE);
+        memset(buff2, 0, BUFF_SIZE);
+        strcpy(buff3, text);
+        len = strlen(text);
+        btsel(dict, buff3, buff2, BUFF_SIZE, &size);
+    }
+    while (btseln(dict, buff3, buff2, BUFF_SIZE, &size) == 0) {
+        if (strncmp(buff3, text, len) == 0) {
+            p = strdup(buff3);
+            return p;
+        } else {
             return NULL;
         }
-        i++;
-        return strdup(name);
     }
-
     return NULL;
-}
-
-void print(char *start, char *end)
-{
-    int index = 0;
-    int size;
-    char value[BUFF_SIZE], key[BUFF_SIZE];
-
-    btsel(dict, start, value, BUFF_SIZE, &size);
-    printf("------------------------------------------------------\n");
-    printf("|%-10s|%-20s|%-20s|\n------------------------------------------------------\n", "INDEX", "KEY",
-           "VALUE");
-    while (btseln(dict, key, value, BUFF_SIZE, &size) == 0)
-    {
-        if (1 || index % 1000 == 1)
-        {
-            printf("|%-10d|%20s|%20s|\n------------------------------------------------------\n", index,
-                   key, value);
-        }
-        if (strcmp(key, end) >= 0)
-        {
-            break;
-        }
-        index++;
-    }
-}
-int get_int()
-{
-    char string[BUFF_SIZE];
-
-    do
-    {
-        fgets(string, BUFF_SIZE, stdin);
-    } while (string[0] == '\n');
-    if (string[strlen(string) - 1] == '\n')
-    {
-        string[strlen(string) - 1] = '\0';
-    }
-
-    return (int)strtol(string, NULL, 10);
-}
-void get_line(char *string)
-{
-    do
-    {
-        fgets(string, BUFF_SIZE, stdin);
-    } while (string[0] == '\n');
-    if (string[strlen(string) - 1] == '\n')
-    {
-        string[strlen(string) - 1] = '\0';
-    }
 }
