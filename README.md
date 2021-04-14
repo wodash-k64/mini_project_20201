@@ -10,3 +10,5 @@ Chương trình từ điển gồm các chức năng:
 Thư viện readline
 
 ```sudo apt install libreadline-dev```
+
+Thư viên [btree](https://hydrus.org.uk/doc/bt/html/index.html)
