@@ -8,28 +8,31 @@
 
 #define BUFF_SIZE 50
 
+// dict là con trỏ tới BTA được lưu trong dict_db,
 int size;
 BTA *dict;
-
+// Hàm phục vụ chức năng autocomplete
 char **suggest_completion(const char *, int, int);
-
+// Hàm phục vụ chức năng autocomplete
 char *suggest_generator(const char *, int);
 
 int main()
 {
+    // Dùng cho chức năng autocomplete
     rl_attempted_completion_function = suggest_completion;
-
+    // Biến lưu trữ lựa chọn người dùng
     int n = 0;
-    char *buff_1 = malloc(BUFF_SIZE);
-    char *buff_2 = malloc(BUFF_SIZE);
-    char *buff_3 = malloc(BUFF_SIZE);
-
+    // Các biến liên quan đến xâu
+    char *buff_key = malloc(BUFF_SIZE);
+    char *buff_value = malloc(BUFF_SIZE);
+    char *buff_search = malloc(BUFF_SIZE);
+    // Khởi tạo BTA
     btinit();
     dict = btopn("dict_db", 0, 0);
-
-    // Nếu chưa có dict_db, dùng dữ liệu từ data.txt để tạo ra
+    // Nếu không có file dict_db khởi tạo từ dữ liệu lấy từ file data.txt
     if (!dict)
     {
+        // Đọc file data.txt và tạo file dict_db
         dict = btcrt("dict_db", 0, 0);
         FILE *f_data = fopen("data.txt", "r");
         if (f_data == NULL)
@@ -41,85 +44,104 @@ int main()
         {
             while (!feof(f_data))
             {
-                memset(buff_1, 0, BUFF_SIZE);
-                memset(buff_2, 0, BUFF_SIZE);
-                fscanf(f_data, "%s", buff_1);
+                memset(buff_key, 0, BUFF_SIZE);
+                memset(buff_value, 0, BUFF_SIZE);
+                fscanf(f_data, "%s", buff_key);
                 fgetc(f_data);
-                for (int i = 0; i < strlen(buff_1); ++i)
+                // Value là cipher code của key dịch phải 1 đơn vị
+                for (int i = 0; i < strlen(buff_key); ++i)
                 {
-                    if (buff_1[i] == 'z')
+                    if (buff_key[i] == 'z')
                     {
-                        buff_2[i] = 'a';
+                        buff_value[i] = 'a';
                     }
                     else
                     {
-                        buff_2[i] = (char)(buff_1[i] + 1);
+                        buff_value[i] = (char)(buff_key[i] + 1);
                     }
                 }
-                btins(dict, buff_1, buff_2, BUFF_SIZE);
+                btins(dict, buff_key, buff_value, BUFF_SIZE);
             }
         }
+        fclose(f_data);
     }
-
+    // MENU
     do
     {
+        // Xóa màn hình mỗi lần chạy xong 1 chức năng và in ra giao diện menu này
         system("clear");
-        printf("\n1.Add\n2.Search\n3.Delete\n4.Print\n5.Exit\nEnter your choice: ");
+        printf("--------------------------------------------------\n");
+        printf("-------------------DICTIONARY APP-----------------\n");
+        printf("--------------------------------------------------\n");
+        printf("==================================================\n");
+        printf("| 1.Add | 2.Search | 3.Delete | 4.Print | 5.Exit |\n");
+        printf("==================================================\n");
+        printf("-> Enter your choice: ");
         __fpurge(stdin);
         scanf("%d", &n);
         switch (n)
         {
+        // Thêm từ vào từ điển
         case 1:
-            // memset(buff_1, 0, BUFF_SIZE);
-            // memset(buff_2, 0, BUFF_SIZE);
             printf("Key: ");
             __fpurge(stdin);
-            fgets(buff_1, BUFF_SIZE, stdin);
-            if (buff_1[strlen(buff_1) - 1] == '\n')
+            fgets(buff_key, BUFF_SIZE, stdin);
+            if (buff_key[strlen(buff_key) - 1] == '\n')
             {
-                buff_1[strlen(buff_1) - 1] = '\0';
+                buff_key[strlen(buff_key) - 1] = '\0';
             }
             printf("Value: ");
             __fpurge(stdin);
-            fgets(buff_2, BUFF_SIZE, stdin);
-            if (buff_2[strlen(buff_1) - 1] == '\n')
+            fgets(buff_value, BUFF_SIZE, stdin);
+            if (buff_value[strlen(buff_key) - 1] == '\n')
             {
-                buff_2[strlen(buff_1) - 1] = '\0';
+                buff_value[strlen(buff_key) - 1] = '\0';
             }
-            btins(dict, buff_1, buff_2, BUFF_SIZE);
+            btins(dict, buff_key, buff_value, BUFF_SIZE);
             break;
+        // Tìm kiếm có tab complete hỗ trợ
         case 2:
-            // memset(buff_1, 0, BUFF_SIZE);
-            // memset(buff_2, 0, BUFF_SIZE);
-            buff_1 = readline("Search: ");
-            if (buff_1[strlen(buff_1) - 1] == ' ')
+            buff_key = readline("Search: ");
+            if (buff_key[strlen(buff_key) - 1] == ' ')
             {
-                buff_1[strlen(buff_1) - 1] = '\0';
+                buff_key[strlen(buff_key) - 1] = '\0';
             }
-            btsel(dict, buff_1, buff_2, BUFF_SIZE, &size);
-            printf("Value of %s is %s\n", buff_1, buff_2);
+            if (btsel(dict, buff_key, buff_value, BUFF_SIZE, &size) == 0)
+            {
+                printf("Value of %s is %s\n", buff_key, buff_value);
+            }
+            else
+            {
+                printf("Value of %s not found!!!\n", buff_key);
+            }
             break;
+        // Xóa một từ khỏi từ điển
         case 3:
             break;
+        // In ra danh sách các từ bắt đầu với giá trị từ buff_key
         case 4:
-            // memset(buff_1, 0, BUFF_SIZE);
-            // memset(buff_2, 0, BUFF_SIZE);
-            // memset(buff_3, 0, BUFF_SIZE);
             printf("Start with: ");
             __fpurge(stdin);
-            fgets(buff_1, BUFF_SIZE, stdin);
-            if (buff_1[strlen(buff_1) - 1] == '\n')
+            fgets(buff_key, BUFF_SIZE, stdin);
+            if (buff_key[strlen(buff_key) - 1] == '\n')
             {
-                buff_1[strlen(buff_1) - 1] = '\0';
+                buff_key[strlen(buff_key) - 1] = '\0';
             }
-            int len = strlen(buff_1);
-            strcpy(buff_3, buff_1);
-            btsel(dict, buff_1, buff_2, BUFF_SIZE, &size);
-            while (btseln(dict, buff_1, buff_2, BUFF_SIZE, &size) == 0)
+            // i dùng để đếm index cho việc in ra, len chứa độ dài xâu buff_key để so sánh trong strncmp
+            int i = 0;
+            int len = strlen(buff_key);
+            strcpy(buff_search, buff_key);
+            // Đưa vị trí con trỏ trong dict về vị trí gần text nhất
+            btsel(dict, buff_key, buff_value, BUFF_SIZE, &size);
+            printf("==================================================\n|%-14s| %-15s| %-15s|\n==================================================\n", "Index", "Key", "Value");
+            // Dịch chuyển con trỏ sang vị trí tiếp theo trong cây
+            while (btseln(dict, buff_key, buff_value, BUFF_SIZE, &size) == 0)
             {
-                if (strncmp(buff_3, buff_1, len) == 0)
+                // Nếu khớp len kí tự thì in ra, dừng khi không khớp nữa
+                if (strncmp(buff_search, buff_key, len) == 0)
                 {
-                    printf("|%20s|%20s|\n-------------------------------------------\n", buff_1, buff_2);
+                    i++;
+                    printf("|No.%-11d| %-15s| %-15s|\n--------------------------------------------------\n", i, buff_key, buff_value);
                 }
                 else
                 {
@@ -127,52 +149,62 @@ int main()
                 }
             }
             break;
+        // Chào tạm biệt trước khi thoát
+        case 5:
+            printf("-> Good bye!!!\n");
+            break;
+        // Thông báo nhập n không hợp lệ
         default:
+            printf("Invalid choice!!!\n");
             break;
         }
-
-        if (n == 2 || n == 4)
+        // Dừng màn hình trong trường hợp tìm kiếm và in ra
+        if (n != 1 && n != 3 && n != 5)
         {
             __fpurge(stdin);
             printf("Press enter to continue!!!");
             getchar();
         }
-
     } while (n != 5);
-    free(buff_1);
-    free(buff_2);
-    free(buff_3);
+    system("rm dict_db");
+    free(buff_key);
+    free(buff_value);
+    free(buff_search);
     return 0;
 }
 
 char **suggest_completion(const char *text, int start, int end)
 {
+    // Khi không có từ gợi ý sẽ không fallback về gợi ý đường dẫn file
     rl_attempted_completion_over = 1;
     return rl_completion_matches(text, suggest_generator);
 }
 
 char *suggest_generator(const char *text, int state)
 {
+    // len lưu lại độ dài của text, các buff lưu key và value
     static int len = 0;
-    char buff1[BUFF_SIZE], buff2[BUFF_SIZE], buff3[BUFF_SIZE], *p;
+    char buffvalue[BUFF_SIZE], buffkey[BUFF_SIZE];
     if (strlen(text) == 0)
     {
         return NULL;
     }
+    // Khi hàm này được gọi lần đầu state sẽ bằng 0
     if (!state)
     {
-        memset(buff1, 0, BUFF_SIZE);
-        memset(buff2, 0, BUFF_SIZE);
-        strcpy(buff3, text);
+        memset(buffvalue, 0, BUFF_SIZE);
+        strcpy(buffkey, text);
         len = strlen(text);
-        btsel(dict, buff3, buff2, BUFF_SIZE, &size);
+        // Đưa vị trí con trỏ trong dict về vị trí gần text nhất
+        btsel(dict, buffkey, buffvalue, BUFF_SIZE, &size);
     }
-    while (btseln(dict, buff3, buff2, BUFF_SIZE, &size) == 0)
+    // Dịch chuyển con trỏ sang vị trí tiếp theo trong cây
+    while (btseln(dict, buffkey, buffvalue, BUFF_SIZE, &size) == 0)
     {
-        if (strncmp(buff3, text, len) == 0)
+        // Trả về nếu khớp len kí tự, nếu không trả về NULL kết thúc hàm complete
+        if (strncmp(buffkey, text, len) == 0)
         {
-            p = strdup(buff3);
-            return p;
+            return strdup(buffkey);
         }
         else
         {
