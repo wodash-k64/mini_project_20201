@@ -6,7 +6,7 @@ Chương trình từ điển gồm các chức năng:
   - Xóa từ.
   - In ra danh sách các từ trong từ điển.
   - Thoát. 
-## Các thư viên cần sử dụng
+## Các thư viện cần sử dụng
 
 Thư viện [btree](https://hydrus.org.uk/doc/bt/html/index.html)
 
