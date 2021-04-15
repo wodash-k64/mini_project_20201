@@ -86,6 +86,7 @@ int main()
             printf("Key: ");
             __fpurge(stdin);
             fgets(buff_key, BUFF_SIZE, stdin);
+            // Sửa lỗi key dính thêm kí tự '\n' ở cuối 
             if (buff_key[strlen(buff_key) - 1] == '\n')
             {
                 buff_key[strlen(buff_key) - 1] = '\0';
@@ -93,9 +94,9 @@ int main()
             printf("Value: ");
             __fpurge(stdin);
             fgets(buff_value, BUFF_SIZE, stdin);
-            if (buff_value[strlen(buff_key) - 1] == '\n')
+            if (buff_value[strlen(buff_value) - 1] == '\n')
             {
-                buff_value[strlen(buff_key) - 1] = '\0';
+                buff_value[strlen(buff_value) - 1] = '\0';
             }
             btins(dict, buff_key, buff_value, BUFF_SIZE);
             break;
@@ -115,8 +116,22 @@ int main()
                 printf("Value of %s not found!!!\n", buff_key);
             }
             break;
-        // Xóa một từ khỏi từ điển
+        // Xóa một từ khỏi từ điển (cũng được tab complete hỗ trợ)
         case 3:
+            buff_key = readline("Key to delete: ");
+            if (buff_key[strlen(buff_key) - 1] == ' ')
+            {
+                buff_key[strlen(buff_key) - 1] = '\0';
+            }
+            if (btsel(dict, buff_key, buff_value, BUFF_SIZE, &size) == 0)
+            {
+                btdel(dict, buff_key);
+                printf("Key %s is deleted\n", buff_key);
+            }
+            else
+            {
+                printf("Key %s not found!!!\n", buff_key);
+            }
             break;
         // In ra danh sách các từ bắt đầu với giá trị từ buff_key
         case 4:
@@ -159,7 +174,7 @@ int main()
             break;
         }
         // Dừng màn hình trong trường hợp tìm kiếm và in ra
-        if (n != 1 && n != 3 && n != 5)
+        if (n != 1 && n != 5)
         {
             __fpurge(stdin);
             printf("Press enter to continue!!!");

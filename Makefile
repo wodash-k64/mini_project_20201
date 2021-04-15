@@ -1,40 +1,91 @@
-# Trình biên dịch được sử dụng là gcc 
-CC	=	gcc
+#
+# 'make'        build executable file 'main'
+# 'make clean'  removes all .o and executable files
+#
 
-# -Iinclude thêm các file header trong thư mục include vào project 
-# -Ilib thêm các file library trong thư mục lib vào project
-# -lbt thêm thư viện bt vào project 
-# -lreadline thêm thư viện readline vào project 
-CFLAGS	= -g -Wall -Iinclude -Llib -lbt -lreadline
+# define the C compiler to use
+CC = gcc
 
-# Lệnh xóa 
-RM	=	rm -f
+# define any compile-time flags
+CFLAGS	:= -Wall -g
 
-# Thư mục file thực thi được tạo ra 
-BIN_FOLDER = out
+# define library paths in addition to /usr/lib
+#   if I wanted to include libraries not in /usr/lib I'd specify
+#   their path using -Lpath, something like:
+LFLAGS = -lbt -lreadline
 
-# Đường dẫn đến main.c
-SRCS	=	src/main.c
+# define output directory
+OUTPUT	:= output
 
-# File .o 
-OBJS	=	$(SRCS:.c=.o)
+# define source directory
+SRC		:= src
 
-# Cho hđh Windows 
+# define include directory
+INCLUDE	:= include
+
+# define lib directory
+LIB		:= lib
+
 ifeq ($(OS),Windows_NT)
-	NAME	=	main.exe
+MAIN	:= main.exe
+SOURCEDIRS	:= $(SRC)
+INCLUDEDIRS	:= $(INCLUDE)
+LIBDIRS		:= $(LIB)
+FIXPATH = $(subst /,\,$1)
+RM			:= del /q /f
+MD	:= mkdir
 else
-	NAME	=	main
+MAIN	:= main
+SOURCEDIRS	:= $(shell find $(SRC) -type d)
+INCLUDEDIRS	:= $(shell find $(INCLUDE) -type d)
+LIBDIRS		:= $(shell find $(LIB) -type d)
+FIXPATH = $1
+RM = rm -f
+MD	:= mkdir -p
 endif
 
-# Biên dịch ra file thực thi 
-all: $(BIN_FOLDER)/$(NAME)
+# define any directories containing header files other than /usr/include
+INCLUDES	:= $(patsubst %,-I%, $(INCLUDEDIRS:%/=%))
 
-$(BIN_FOLDER)/$(NAME):$(OBJS)
-	$(CC) -o $(BIN_FOLDER)/$(NAME) ${SRCS} $(CFLAGS)
+# define the C libs
+LIBS		:= $(patsubst %,-L%, $(LIBDIRS:%/=%))
 
-# Xóa file .o và file thực thi 
+# define the C source files
+SOURCES		:= $(wildcard $(patsubst %,%/*.c, $(SOURCEDIRS)))
+
+# define the C object files 
+OBJECTS		:= $(SOURCES:.c=.o)
+
+#
+# The following part of the makefile is generic; it can be used to 
+# build any executable just by changing the definitions above and by
+# deleting dependencies appended to the file from 'make depend'
+#
+
+OUTPUTMAIN	:= $(call FIXPATH,$(OUTPUT)/$(MAIN))
+
+all: $(OUTPUT) $(MAIN)
+	@echo Executing 'all' complete!
+
+$(OUTPUT):
+	$(MD) $(OUTPUT)
+
+$(MAIN): $(OBJECTS) 
+	$(CC) $(CFLAGS) $(INCLUDES) -o $(OUTPUTMAIN) $(OBJECTS) $(LFLAGS) $(LIBS)
+
+# this is a suffix replacement rule for building .o's from .c's
+# it uses automatic variables $<: the name of the prerequisite of
+# the rule(a .c file) and $@: the name of the target of the rule (a .o file) 
+# (see the gnu make manual section about automatic variables)
+.c.o:
+	$(CC) $(CFLAGS) $(INCLUDES) -c $<  -o $@
+
+.PHONY: clean
 clean:
-	$(RM) $(OBJS)
-	$(RM) $(BIN_FOLDER)/$(NAME)
+	$(RM) $(OUTPUTMAIN)
+	$(RM) $(call FIXPATH,$(OBJECTS))
+	@echo Cleanup complete!
 
-.PHONY: all clean
+run: all
+	./$(OUTPUTMAIN)
+	@echo Executing 'run: all' complete!
